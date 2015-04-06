@@ -35,6 +35,7 @@ def classify_waveform(sensor_data):
 #let's load up our wave form classificiations
 def load_waveform_samples():
 	print("Loading data for ideal waveforms like blinking")
+	# each of these should already be in FFTified form
 	pass
 
 class FFTBCIThread(threading.Thread):
@@ -51,7 +52,7 @@ class FFTBCIThread(threading.Thread):
 		while True:
 			sample = samples.get()
 			if sample != None:
-				if sample.id - self.prev_id > 1:
+				if (sample.id - self.prev_id > 1) and sample.id != 0 and self.prev_id != 255:
 					print("Warning, packets may've been skipped!")
 				self.prev_id = sample.id
 				for i in xrange(8):
