@@ -18,9 +18,13 @@ def handle_sample(sample):
 
 def classify_waveform(sensor_data):
 	print("Classifying waveforms on sensors")
-	#run an np.fft.rfft on it
+	#run an np.fft.rfft on it, since those're ideal for values that are only real
+	# http://docs.scipy.org/doc/numpy/reference/generated/numpy.fft.rfft.html
+	fftified = np.fft.rfft(sensor_data)
 	for w in waveforms:
-		pass
+		# http://docs.scipy.org/doc/numpy/reference/generated/numpy.allclose.html#numpy-allclose
+		if np.allclose(fftified, w):
+			pass
 		#check how similar the contents are by comparing with each waveform type
 		#write the result to the serial for the cart board
 		#optional: if we get a new sample, then we should discard our current data
@@ -37,7 +41,8 @@ class FFTBCIThread(threading.Thread):
 	def __init__(self):
 		self.sample_counter = 0
 		threading.Thread.__init__(self)
-		self.samples = []
+		# placeholders since samples are per channel
+		self.samples = ([], [], [], [], [], [], [], [])
 		self.prev_id = -1
 		#number of packets to collect before running an FFT
 		self.max_packets = 1024
@@ -49,12 +54,16 @@ class FFTBCIThread(threading.Thread):
 				if sample.id - self.prev_id > 1:
 					print("Warning, packets may've been skipped!")
 				self.prev_id = sample.id
-				self.samples.append(sample.channel_data[:])
+				for i in xrange(8):
+					self.samples[i].append(sample.channel_data[i])
 				self.sample_counter += 1
 				if self.sample_counter == self.max_packets:
 					#analyse
-					classify_waveform(self.samples)
-					del self.samples[:]
+					for i in xrange(8):
+						result = classify_waveform(self.samples[i])
+						# write this over serial
+					for changather in self.samples:
+						del changather[:]
 					self.sample_counter = 0
 
 load_waveform_samples()
