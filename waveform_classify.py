@@ -9,6 +9,8 @@ import Queue
 import atexit
 import os
 
+from argparse import ArgumentParser
+
 # http://www.devshed.com/c/a/Python/Basic-Threading-in-Python/
 # https://github.com/OpenBCI/OpenBCI_Python/blob/master/user.py
 
@@ -85,10 +87,16 @@ class FFTBCIThread(threading.Thread):
 						del changather[:]
 					self.sample_counter = 0
 
+aparser = ArgumentParser()
+aparser.add_argument('dongle_device')
+aparser.add_argument('underlying_arduino')
+args = aparser.parse_args()
+
 load_waveform_samples()
 # make flexible
 
-board = OpenBCIBoard(port="/dev/ttyUSB0")
+board = OpenBCIBoard(port=args.dongle_device)
+arduino_slave = serial.Serial(args.underlying_arduino, 9600) #replace with serial rate for underlying arduino program
 #board.print_register_settings()
 
 atexit.register(board.disconnect)
