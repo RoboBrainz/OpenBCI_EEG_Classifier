@@ -99,6 +99,11 @@ board = OpenBCIBoard(port=args.dongle_device)
 arduino_slave = serial.Serial(args.underlying_arduino, 9600) #replace with serial rate for underlying arduino program
 #board.print_register_settings()
 
+for c in 'svcd':
+	board.ser.write(c)
+	time.sleep(0.100)
+time.sleep(0.100)
+
 atexit.register(board.disconnect)
 
 # collect the data in a separate thread
